@@ -70,22 +70,10 @@ public class MainController implements Initializable, ConnectionListener {
     of ways - meaning you'd need just as many conditional code branches in traditional procedural code! Yuck!
      */
     private void bindControlsToProperties(){
-        radioConnMethodAuto.setUserData("auto");
-        toggleGroupConnMethod.add( radioConnMethodAuto, radioConnMethodAuto.getUserData() );
-        radioConnMethodLongPolling.setUserData("longpolling");
-        toggleGroupConnMethod.add( radioConnMethodLongPolling, radioConnMethodLongPolling.getUserData() );
-        radioConnMethodWebSocket.setUserData("websocket");
-        toggleGroupConnMethod.add( radioConnMethodWebSocket, radioConnMethodWebSocket.getUserData() );
-
-        radioSendToDefaultNetworks.setUserData("default");
-        toggleGroupSendTo.add( radioSendToDefaultNetworks, radioSendToDefaultNetworks.getUserData() );
-        radioSendToSessionIDs.setUserData("sessions");
-        toggleGroupSendTo.add( radioSendToSessionIDs, radioSendToSessionIDs.getUserData() );
-        radioSendToSelectedNetworks.setUserData("networks");
-        toggleGroupSendTo.add( radioSendToSelectedNetworks, radioSendToSelectedNetworks.getUserData() );
 
         Bindings.bindBidirectional(userNameTextField.textProperty(), _userNameProperty);
         Bindings.bindBidirectional(networkPasswordTextField.textProperty(), _networkPasswordProperty);
+        Bindings.bindBidirectional(networkNamesTextField.textProperty(), _networkNamesProperty);
         Bindings.bindBidirectional(dataTypeTextField.textProperty(), _dataTypeProperty);
         Bindings.bindBidirectional(textToSendTextField.textProperty(), _textToSendProperty);
 
@@ -100,20 +88,12 @@ public class MainController implements Initializable, ConnectionListener {
         networkPasswordTextField.disableProperty().bind(_isConnected);
 
         Bindings.bindBidirectional(enableDebugMessagesCheckBox.selectedProperty(), _enableDebugMessagesProperty);
+        Bindings.bindBidirectional(discoverableCheckBox.selectedProperty(), _discoverableProperty);
+        Bindings.bindBidirectional(instanceNameTextField.textProperty(), _instanceNameProperty);
+        Bindings.bindBidirectional(downloadRequestTimeoutTextField.textProperty(), _downloadRequestTimeoutProperty);
 
         Bindings.bindBidirectional(sendToSessionIdsTextField.textProperty(), _sendToSessionIds);
-        sendToSessionIdsTextField.disableProperty().bind(radioSendToSessionIDs.selectedProperty().not());
-
-        Bindings.bindBidirectional(selectedNetworkNamesListView.itemsProperty(), _selectedNetworkNames);
-        selectedNetworkNamesListView.disableProperty().bind(radioSendToSelectedNetworks.selectedProperty().not());
-        selectedNetworkNamesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        _selectedNetworkNamesSelection.bind(new SimpleListProperty<String>(selectedNetworkNamesListView.getSelectionModel().getSelectedItems()));
-
-        Bindings.bindBidirectional(toggleGroupConnMethod.valueProperty(), _connMethodName);
-        Bindings.bindBidirectional(toggleGroupSendTo.valueProperty(), _sendToMethodName);
-
-        Bindings.bindBidirectional(addCarriageReturnCheckBox.selectedProperty(), _addCarriageReturnProperty);
-        Bindings.bindBidirectional(addLineFeedCheckBox.selectedProperty(), _addLineFeedProperty);
+        Bindings.bindBidirectional(sendToNetworkNamesTextField.textProperty(), _sendToNetworkNames);
 
         Bindings.bindBidirectional(addSendCountToStringCheckBox.selectedProperty(), _addSendCountToStringProperty);
 
@@ -137,6 +117,15 @@ public class MainController implements Initializable, ConnectionListener {
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
+            }
+        });
+
+        _discoverableProperty.addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if ( null != _cloud) {
+                    _cloud.setDiscoverable(newValue);
+                }
             }
         });
     }
@@ -191,16 +180,42 @@ public class MainController implements Initializable, ConnectionListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                String str = new String(event.data, StandardCharsets.UTF_8);
-                _textReceivedProperty.setValue(str);
-                StringBuilder sb = new StringBuilder()
-                        .append("Data type: ")
-                        .append(event.dataType)
-                        .append(" from: ")
-                        .append(event.fromSessionID)
-                        .append("\r\n")
-                        .append(str);
-                //_messageProperty.setValue(sb.toString());
+                if (_discoverableProperty.getValue() && (event.dataType.equals("Discovery Response")))
+                {
+                    String discoveredName = new String(event.data, StandardCharsets.UTF_8);
+                    String discoveredSessionID = Integer.toString(event.fromSessionID);
+                    StringBuilder sb = new StringBuilder()
+                            .append("Device discovered - Name: ")
+                            .append(discoveredName)
+                            .append(" session ID: ")
+                            .append(discoveredSessionID);
+                    // delegate across to the UI thread - necessary whenever we want to manipulate the user interface.
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            addStatusMessage(sb.toString());
+                        }
+                    });
+                }
+                else {
+                    String str = _textReceivedProperty.getValue();
+                    String recStr = new String(event.data, StandardCharsets.UTF_8);
+                    _textReceivedProperty.setValue(str.concat(recStr));
+                    StringBuilder sb = new StringBuilder()
+                            .append("Data type: ")
+                            .append(event.dataType)
+                            .append(" ,from: ")
+                            .append(event.fromSessionID)
+                            .append(" ,data: ")
+                            .append(recStr);
+                    // delegate across to the UI thread - necessary whenever we want to manipulate the user interface.
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            addStatusMessage(sb.toString());
+                        }
+                    });
+                }
             }
         });
 
@@ -227,29 +242,28 @@ public class MainController implements Initializable, ConnectionListener {
 
     private StringProperty _userNameProperty = new SimpleStringProperty("hubert@robospace.co.nz");
     private StringProperty _networkPasswordProperty = new SimpleStringProperty("hrj123");
-    private StringProperty _sessionIdProperty = new SimpleStringProperty("sessionid");
+    private StringProperty _networkNamesProperty = new SimpleStringProperty("network 1");
+    private StringProperty _sessionIdProperty = new SimpleStringProperty("-1");
     private IntegerProperty _requestCountProperty = new SimpleIntegerProperty(0);
     private IntegerProperty _sendCountProperty = new SimpleIntegerProperty(0);
-    private BooleanProperty _useEncryptionProperty = new SimpleBooleanProperty(true);
-    private BooleanProperty _enableDebugMessagesProperty = new SimpleBooleanProperty(true);
+    private BooleanProperty _useEncryptionProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty _enableDebugMessagesProperty = new SimpleBooleanProperty(false);
+    private BooleanProperty _discoverableProperty = new SimpleBooleanProperty(true);
     private StringProperty _dataTypeProperty = new SimpleStringProperty("test data");
     private StringProperty _textToSendProperty = new SimpleStringProperty("test message");
-
-    private BooleanProperty _addCarriageReturnProperty = new SimpleBooleanProperty(false);
-    private BooleanProperty _addLineFeedProperty = new SimpleBooleanProperty(false);
+    private StringProperty _instanceNameProperty = new SimpleStringProperty("cywJavaInterface");
+    private StringProperty _downloadRequestTimeoutProperty = new SimpleStringProperty("120");
 
     private BooleanProperty _addSendCountToStringProperty = new SimpleBooleanProperty(true);
 
-    private StringProperty _sendToSessionIds = new SimpleStringProperty();
+    private StringProperty _sendToSessionIds = new SimpleStringProperty("");
+    private StringProperty _sendToNetworkNames = new SimpleStringProperty("");
     private ListProperty<String> _selectedNetworkNames = new SimpleListProperty<String>();
     private ListProperty<String> _selectedNetworkNamesSelection = new SimpleListProperty<String>();
 
-    private StringProperty _textReceivedProperty = new SimpleStringProperty("textreceived");
+    private StringProperty _textReceivedProperty = new SimpleStringProperty("");
     private ListProperty<String> _messageProperty = new SimpleListProperty<String>(FXCollections.observableArrayList());
     private IntegerProperty _messageIndexProperty = new SimpleIntegerProperty();
-
-    private StringProperty _connMethodName = new SimpleStringProperty("longpolling");
-    private StringProperty _sendToMethodName = new SimpleStringProperty("default");
 
     public String getUserName() {
         return _userNameProperty.get();
@@ -266,36 +280,26 @@ public class MainController implements Initializable, ConnectionListener {
     }
 
 
-
-
     // Button Handlers
     @FXML
-    protected void handleSetNetworkNames(ActionEvent event) throws IOException {
-        Stage childStage = new Stage();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/NetworkNames.fxml"));
-        Parent root = loader.load();
-
-        Scene scene = new Scene(root);
-        childStage.setScene(scene);
-
-
-        NetworkNamesController controller = (NetworkNamesController)loader.getController();
-        controller.setStage(childStage);
-        controller.setNetworkNames(_selectedNetworkNames);
-
-        childStage.showAndWait();
-
-        if (!controller.getWasCanceled())
-            _selectedNetworkNames.setValue(FXCollections.observableArrayList( controller.getNetworkNames()));
+    protected void handleSetNetworkNames(ActionEvent event) throws UnsupportedEncodingException {
+        if (_cloud != null) {
+            String[] networkNames = _networkNamesProperty.getValue().split("\n");
+            _cloud.setNewNetworkNames(networkNames);
+        }
     }
 
     @FXML
     protected void handleStart(ActionEvent event) throws UnsupportedEncodingException {
         if ( null == _cloud) {
-            _cloud = new CywCloudInterface(_userNameProperty.getValue(), _networkPasswordProperty.getValue(), "network 1");
+            String[] networkNames = _networkNamesProperty.getValue().split("\n");
+            _cloud = new CywCloudInterface(_userNameProperty.getValue(), _networkPasswordProperty.getValue(), networkNames);
             _cloud.addConnectionListener(this);
             _cloud.setEnableDebugMessages(_enableDebugMessagesProperty.getValue());
             _cloud.setUseEncryption(_useEncryptionProperty.getValue());
+            _cloud.setDiscoverable(_discoverableProperty.getValue());
+            _cloud.setName(_instanceNameProperty.getValue());
+            _cloud.setDownloadRequestTimeout(Integer.parseInt(_downloadRequestTimeoutProperty.getValue()));
             _cloud.startService();
         } else {
             _cloud.closeConnection();
@@ -316,39 +320,31 @@ public class MainController implements Initializable, ConnectionListener {
             String textToSend = _textToSendProperty.get();
             if (_addSendCountToStringProperty.get())
                 textToSend += (_sendCountProperty.get() + 1);
+            data.convertStringForSending(textToSend);     //convert from string to byte array
 
-            if (_addCarriageReturnProperty.get())
+            String sessionIds = _sendToSessionIds.get();
+            String toNetworks = _sendToNetworkNames.get();
+
+            //check if the message must be sent to specific session IDs
+            if (!sessionIds.equals(""))
             {
-                textToSend += "\r";
-            }
-            if (_addLineFeedProperty.get())
-            {
-                textToSend += "\n";
-            }
-
-            data.convertStringForSending(textToSend);
-
-
-            if (_sendToMethodName.getValue() == "default") {
-                // not implemented
-            } else if (_sendToMethodName.getValue() == "sessions") {
-                String sessionIds = _sendToSessionIds.get();
-                if ( null != sessionIds) {
-                    String[] sessionIdArray = _sendToSessionIds.getValue().split(",");
-                    for (String sessionId : sessionIdArray)
-                        data.toSessionIDs.add(Integer.parseInt(sessionId));
+                String[] sessionIdArray = sessionIds.split(",");
+                for (String sessionId : sessionIdArray) {
+                    data.toSessionIDs.add(Integer.parseInt(sessionId));
                 }
-            } else if (_sendToMethodName.getValue() == "networks") {
-                // not implemented
-                if ( null != _selectedNetworkNamesSelection.get())
-                    for(String networkName : _selectedNetworkNamesSelection.get())
-                        data.toNetworks.add(networkName);
+            }
+
+            //check if message must be sent to specific networks
+            if (!toNetworks.equals("")) {
+                String[] networkNamesArray = toNetworks.split("\n");
+                for(String networkName : networkNamesArray) {
+                    data.toNetworks.add(networkName);
+                }
             }
 
             data.dataType = _dataTypeProperty.getValue();
 
             _cloud.sendData(data);
-
 
             _sendCountProperty.setValue(_cloud.getHttpUploadRequestCount());
 
@@ -358,17 +354,41 @@ public class MainController implements Initializable, ConnectionListener {
     }
 
     @FXML
-    protected void handleSend10(ActionEvent event) {
+    protected void handleDiscover(ActionEvent event) {
+        if (_cloud != null) {
+            try {
+                _cloud.SendDiscovery();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
+    protected void handleSetInstanceName(ActionEvent event) {
+
+        if (_cloud != null)
+        {
+            _cloud.setName(_instanceNameProperty.getValue());
+        }
+    }
+
+    @FXML
+    protected void handleSetDownloadRequestTimeout(ActionEvent event) {
+        if (_cloud != null)
+        {
+            _cloud.setDownloadRequestTimeout(Integer.parseInt(_downloadRequestTimeoutProperty.getValue()));
+        }
     }
 
     @FXML
     protected void handleClearTextReceived(ActionEvent event) {
-        _textReceivedProperty.setValue(null);
+        _textReceivedProperty.setValue("");
     }
 
     @FXML
     protected void handleClearMessage(ActionEvent event) {
-        _messageProperty.setValue(null);
+        _messageProperty.clear();
     }
 
 
@@ -380,9 +400,11 @@ public class MainController implements Initializable, ConnectionListener {
     @FXML
     public TextField networkPasswordTextField;
     @FXML
+    public TextArea networkNamesTextField;
+    @FXML
     public TextField dataTypeTextField;
     @FXML
-    public TextArea textToSendTextField;
+    public TextField textToSendTextField;
 
     @FXML
     public Label sessionIdLabel;
@@ -396,8 +418,13 @@ public class MainController implements Initializable, ConnectionListener {
     @FXML
     public CheckBox enableDebugMessagesCheckBox;
     @FXML
+    public CheckBox discoverableCheckBox;
+    @FXML
     public CheckBox addSendCountToStringCheckBox;
-
+    @FXML
+    public TextField instanceNameTextField;
+    @FXML
+    public TextField downloadRequestTimeoutTextField;
 
     @FXML
     public TextArea textReceivedTextField;
@@ -409,18 +436,12 @@ public class MainController implements Initializable, ConnectionListener {
     @FXML
     public CheckBox addLineFeedCheckBox;
 
-
-
     @FXML
     public RadioButton radioConnMethodAuto;
     @FXML
     public RadioButton radioConnMethodWebSocket;
     @FXML
     public RadioButton radioConnMethodLongPolling;
-
-    private ToggleGroupValue toggleGroupConnMethod = new ToggleGroupValue();
-
-
 
     @FXML
     public RadioButton radioSendToDefaultNetworks;
@@ -429,10 +450,10 @@ public class MainController implements Initializable, ConnectionListener {
     @FXML
     public RadioButton radioSendToSelectedNetworks;
 
-    private ToggleGroupValue toggleGroupSendTo = new ToggleGroupValue();
-
     @FXML
     public TextField sendToSessionIdsTextField;
+    @FXML
+    public TextArea sendToNetworkNamesTextField;
     @FXML
     public ListView selectedNetworkNamesListView;
 

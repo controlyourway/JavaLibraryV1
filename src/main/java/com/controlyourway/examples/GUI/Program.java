@@ -1,6 +1,8 @@
 package com.controlyourway.examples.GUI;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -9,6 +11,7 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.Event;
 
 /**
  * Created by alangley on 21/10/15.
@@ -33,6 +36,10 @@ public class Program extends Application {
 
             primaryStage.setScene(scene);
             primaryStage.setTitle("Control Your Way");
+            primaryStage.setOnCloseRequest(event -> {
+                Platform.exit();
+                System.exit(0);
+            });
 
             // the View should have already created an instance of a controller class for us - grab it.
             MainController controller = loader.getController();

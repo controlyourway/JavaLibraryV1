@@ -5,47 +5,92 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="641.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controlyourway.examples.GUI.MainController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="641.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controlyourway.examples.GUI.MainController">
    <children>
-      <TitledPane collapsible="false" layoutX="4.0" layoutY="2.0" prefHeight="625.0" prefWidth="591.0" text="Test Device">
+      <TitledPane collapsible="false" layoutX="4.0" layoutY="2.0" prefHeight="625.0" prefWidth="700.0" text="Control Your Way Test Program">
          <content>
-            <VBox alignment="CENTER" prefHeight="322.0" prefWidth="498.0">
+            <VBox alignment="CENTER" prefHeight="322.0" prefWidth="700.0">
                <children>
-                  <HBox prefHeight="373.0" prefWidth="478.0">
+                  <HBox prefHeight="326.0" prefWidth="678.0">
                      <children>
-                        <VBox prefHeight="373.0" prefWidth="316.0">
-                           <children>
-                              <HBox prefHeight="232.0" prefWidth="273.0">
+                        <TitledPane collapsible="false" prefHeight="320.0" prefWidth="230.0" text="Connection">
+                           <content>
+                              <VBox prefHeight="294.0" prefWidth="230.0">
                                  <children>
-                                    <VBox prefHeight="199.0" prefWidth="140.0">
+                                    <Label text="User Name:" />
+                                    <TextField fx:id="userNameTextField" />
+                                    <Label text="Network Password:" />
+                                    <TextField fx:id="networkPasswordTextField" />
+                                    <Label text="Network names (1 per line):" />
+                                    <TextArea fx:id="networkNamesTextField" prefHeight="89.0" prefWidth="273.0" text="network 1" />
+                                    <HBox prefHeight="19.0" prefWidth="140.0">
                                        <children>
-                                          <Label text="User Name" />
-                                          <TextField fx:id="userNameTextField" />
-                                          <Label text="Network Password" />
-                                          <TextField fx:id="networkPasswordTextField" />
-                                          <Button mnemonicParsing="false" onAction="#handleSetNetworkNames" prefHeight="26.0" prefWidth="140.0" text="Set Network Names" />
-                                          <HBox prefHeight="19.0" prefWidth="140.0">
-                                             <children>
-                                                <Button fx:id="buttonStart" mnemonicParsing="false" onAction="#handleStart" text="Start" />
-                                             </children>
-                                          </HBox>
-                                          <Label text="Data Type" />
-                                          <TextField fx:id="dataTypeTextField" />
+                                           <Button mnemonicParsing="false" onAction="#handleSetNetworkNames" prefHeight="26.0" prefWidth="140.0" text="Set Network Names">
+                                               <VBox.margin>
+                                                   <Insets top="5.0" />
+                                               </VBox.margin>
+                                             <HBox.margin>
+                                                <Insets top="5.0" />
+                                             </HBox.margin></Button>
+                                           <Button fx:id="buttonStart" mnemonicParsing="false" onAction="#handleStart" text="Start">
+                                                <HBox.margin>
+                                                    <Insets left="5.0" top="5.0" />
+                                                </HBox.margin></Button>
                                        </children>
-                                    </VBox>
-                                    <VBox prefHeight="223.0" prefWidth="170.0">
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </content>
+                        </TitledPane>
+                        <TitledPane collapsible="false" prefHeight="320.0" prefWidth="250.0" text="Send Data">
+                           <content>
+                              <VBox prefHeight="294.0" prefWidth="250.0">
+                                 <children>
+                                    <Label text="Send To Session IDs (comma separated)" />
+                                    <TextField fx:id="sendToSessionIdsTextField" />
+                                    <Label text="Send to networks (1 per line)" />
+                                    <TextArea fx:id="sendToNetworkNamesTextField" prefHeight="89.0" prefWidth="273.0" />
+                                    <Label text="Text to send" />
+                                    <TextField fx:id="textToSendTextField" />
+                                    <Label text="Data Type" />
+                                    <TextField fx:id="dataTypeTextField" />
+                                    <CheckBox fx:id="addSendCountToStringCheckBox" mnemonicParsing="false" prefHeight="18.0" prefWidth="177.0" text="Add send count to string">
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin></CheckBox>
+                                    <HBox prefHeight="7.0" prefWidth="278.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" onAction="#handleSend" text="Send">
+                                             <HBox.margin>
+                                                <Insets top="5.0" />
+                                             </HBox.margin></Button>
+                                          <Button mnemonicParsing="false" onAction="#handleDiscover" text="Discover">
+                                             <HBox.margin>
+                                                <Insets left="5.0" top="5.0" />
+                                             </HBox.margin></Button>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </content>
+                        </TitledPane>
+                        <TitledPane collapsible="false" prefHeight="320.0" prefWidth="230.0" text="State">
+                           <content>
+                              <VBox prefHeight="320.0" prefWidth="230.0">
+                                 <children>
+                                    <VBox prefHeight="320.0" prefWidth="170.0">
                                        <children>
                                           <GridPane prefHeight="90.0" prefWidth="137.0">
-                                            <columnConstraints>
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="60.0" prefWidth="100.0" />
-                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                            </columnConstraints>
-                                            <rowConstraints>
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="60.0" prefWidth="30.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                             </columnConstraints>
+                                             <rowConstraints>
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                            </rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                             </rowConstraints>
                                              <children>
                                                 <Label text="Session ID" />
                                                 <Label fx:id="sessionIdLabel" text="Label" GridPane.columnIndex="1" />
@@ -56,68 +101,61 @@
                                              </children>
                                           </GridPane>
                                           <CheckBox fx:id="useEncryptionCheckBox" mnemonicParsing="false" text="Use encryption" />
-                                          <CheckBox fx:id="enableDebugMessagesCheckBox" mnemonicParsing="false" text="Enable Debug Messages" />
-                                          <TitledPane collapsible="false" prefHeight="101.0" prefWidth="135.0" text="Connection Method">
-                                             <content>
-                                                <VBox prefHeight="200.0" prefWidth="100.0">
-                                                   <children>
-                                                      <RadioButton fx:id="radioConnMethodAuto" mnemonicParsing="false" text="Auto" />
-                                                      <RadioButton fx:id="radioConnMethodWebSocket" mnemonicParsing="false" text="WebSocket" />
-                                                      <RadioButton fx:id="radioConnMethodLongPolling" mnemonicParsing="false" text="Long Polling" />
-                                                   </children>
-                                                </VBox>
-                                             </content>
-                                          </TitledPane>
+                                          <CheckBox fx:id="enableDebugMessagesCheckBox" mnemonicParsing="false" text="Enable Debug Messages">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin></CheckBox>
+                                          <CheckBox fx:id="discoverableCheckBox" mnemonicParsing="false" text="Discoverable">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin></CheckBox>
+                                          <Label text="Instance name">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin></Label>
+                                          <TextField fx:id="instanceNameTextField"/>
+                                          <Button mnemonicParsing="false" onAction="#handleSetInstanceName" text="Set instance name">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin></Button>
+                                          <Label text="Download request timeout (seconds)">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin></Label>
+                                          <TextField fx:id="downloadRequestTimeoutTextField"/>
+                                          <Button mnemonicParsing="false" onAction="#handleSetDownloadRequestTimeout" text="Set download request timeout">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin></Button>
                                        </children>
                                     </VBox>
-                                 </children>
-                              </HBox>
-                              <Label text="Text To Send" />
-                              <TextArea fx:id="textToSendTextField" prefHeight="89.0" prefWidth="273.0" />
-                              <HBox prefHeight="7.0" prefWidth="278.0">
-                                 <children>
-                                    <Button mnemonicParsing="false" onAction="#handleSend" text="Send" />
-                                    <Button mnemonicParsing="false" onAction="#handleSend10" text="Send 10" />
-                                    <VBox prefHeight="36.0" prefWidth="83.0">
-                                       <children>
-                                          <CheckBox fx:id="addCarriageReturnCheckBox" mnemonicParsing="false" text="Add CR" />
-                                          <CheckBox fx:id="addLineFeedCheckBox" mnemonicParsing="false" text="Add LF" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                              <CheckBox fx:id="addSendCountToStringCheckBox" mnemonicParsing="false" prefHeight="18.0" prefWidth="177.0" text="Add send count to string" />
-                           </children>
-                        </VBox>
-                        <TitledPane collapsible="false" prefHeight="318.0" prefWidth="276.0" text="Send To">
-                           <content>
-                              <VBox prefHeight="291.0" prefWidth="140.0">
-                                 <children>
-                                    <RadioButton fx:id="radioSendToDefaultNetworks" mnemonicParsing="false" text="Default Networks" />
-                                    <RadioButton fx:id="radioSendToSessionIDs" mnemonicParsing="false" text="Session IDs" />
-                                    <RadioButton fx:id="radioSendToSelectedNetworks" mnemonicParsing="false" text="Selected Networks" />
-                                    <Label text="Send To Session IDs (comma separated)" />
-                                    <TextField fx:id="sendToSessionIdsTextField" />
-                                    <Label text="Select Network Names" />
-                                    <ListView fx:id="selectedNetworkNamesListView" prefHeight="200.0" prefWidth="200.0" />
                                  </children>
                               </VBox>
                            </content>
                         </TitledPane>
                      </children>
                   </HBox>
-                  <Label prefHeight="16.0" prefWidth="571.0" text="Text Received" />
-                  <TextArea fx:id="textReceivedTextField" prefHeight="61.0" prefWidth="478.0" />
+                  <Label prefHeight="17.0" prefWidth="712.0" text="Text Received" />
+                  <TextArea fx:id="textReceivedTextField" prefHeight="61.0" prefWidth="478.0" wrapText="true" />
                   <HBox prefHeight="0.0" prefWidth="478.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#handleClearTextReceived" text="Clear" />
+                        <Button mnemonicParsing="false" onAction="#handleClearTextReceived" text="Clear">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin></Button>
                      </children>
                   </HBox>
-                  <Label prefHeight="16.0" prefWidth="532.0" text="Message" />
+                  <Label prefHeight="17.0" prefWidth="712.0" text="Message">
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin></Label>
                   <ListView fx:id="messageListView" prefHeight="78.0" prefWidth="569.0" />
                   <HBox prefHeight="18.0" prefWidth="478.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#handleClearMessage" text="Clear" />
+                        <Button mnemonicParsing="false" onAction="#handleClearMessage" text="Clear">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin></Button>
                      </children>
                   </HBox>
                </children>

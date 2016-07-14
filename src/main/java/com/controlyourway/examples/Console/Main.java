@@ -31,7 +31,6 @@ public class Main {
 
         cloud.startService();
 
-
         Console c = System.console();
         System.out.println("\nPress ENTER to proceed.\n");
         if (c != null) {

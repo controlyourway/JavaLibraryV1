@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class CywCloudInterface {
     //constants
-	private final String defaultInstanceName = "cywCsWebInterface";
+	private final String defaultInstanceName = "cywJavaInterface";
     private final int c_minimumDownloadThresholdTime = 5;       //if shorter than this most likely the server was not reached
     private final int c_downloadDecreaseTime = 10;              //when a router terminates a connection then this amount is subtracted from the download expire time
     private final int c_downloadErrorWaitTime = 5;              //if something goes wrong then wait this amount of seconds before starting a new request
@@ -63,10 +63,10 @@ public class CywCloudInterface {
     private statesEnum state = statesEnum.RequestCredentials;
 
     //queues
-    private Queue<CywToCloudPacketClass> toCloudQueue = new PriorityQueue<CywToCloudPacketClass>();
-    private Queue<CywSendPacketHttpClass> toMasterForCloudQueue = new PriorityQueue<CywSendPacketHttpClass>();
-    private Queue<FromToCloudToMasterThreadData> fromToCloudToMasterQueue = new PriorityQueue<FromToCloudToMasterThreadData>();
-    private Queue<FromFromCloudToMasterThreadData> fromFromCloudToMasterQueue = new PriorityQueue<FromFromCloudToMasterThreadData>();
+    private Queue<CywToCloudPacketClass> toCloudQueue = new LinkedList<CywToCloudPacketClass>();
+    private Queue<CywSendPacketHttpClass> toMasterForCloudQueue = new LinkedList<CywSendPacketHttpClass>();
+    private Queue<FromToCloudToMasterThreadData> fromToCloudToMasterQueue = new LinkedList<FromToCloudToMasterThreadData>();
+    private Queue<FromFromCloudToMasterThreadData> fromFromCloudToMasterQueue = new LinkedList<FromFromCloudToMasterThreadData>();
 
     //other variables
     private int fromCloudCnt = 0;   //this variable is sent in the url to make sure I don't get a cached response
@@ -207,8 +207,13 @@ public class CywCloudInterface {
         }
     }
 
-    public void setNewNetworkNames(List<String> networkNames) throws UnsupportedEncodingException {
-        this.networkNames = networkNames;
+    public void setNewNetworkNames(String... networkNames) throws UnsupportedEncodingException {
+        this.networkNames = new ArrayList<String>();
+        if ( null != networkNames ) {
+            for (String networkName : networkNames) {
+                this.networkNames.add(networkName);
+            }
+        }
         if (state == statesEnum.Running)
         {
             //when service is running cancel the current download request so new default networks can be set
@@ -292,9 +297,11 @@ public class CywCloudInterface {
         this.userName = username;
         this.networkPassword = networkPassword;
         this.networkNames = new ArrayList<String>();
-        if ( null != networkNames )
-            for (String networkName : networkNames)
+        if ( null != networkNames ) {
+            for (String networkName : networkNames) {
                 this.networkNames.add(networkName);
+            }
+        }
         sessionId = "-1";
         name = defaultInstanceName;
 		discoverable = true;
