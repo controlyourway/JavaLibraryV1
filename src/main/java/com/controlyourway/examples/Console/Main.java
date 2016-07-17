@@ -23,20 +23,19 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-	// write your code here
-
-        CywCloudInterface cloud = new CywCloudInterface("hubert@robospace.co.nz", "hrj123", "network 1");
-        //cloud.setNewNetworkNames("network 1");
-        cloud.addConnectionListener(new Logger(cloud));
-
+        CywCloudInterface cloud = new CywCloudInterface("your_email@address.com", "your_network_password", "network 1");
+        cloud.addConnectionListener(new ConsoleListener(cloud));
+        cloud.setName("My Java Test");
         cloud.startService();
 
-        Console c = System.console();
-        System.out.println("\nPress ENTER to proceed.\n");
-        if (c != null) {
-            c.readLine();
-        } else
-            readLine();
+        System.out.println("\nType text to send and press ENTER, type quit to end application.\n");
+        String line = null;
+        while((line = readLine()) != null && !line.equalsIgnoreCase("quit")) {
+            CywDataToSend data = new CywDataToSend();
+            data.dataType = "test message";
+            data.convertStringForSending(line);
+            cloud.sendData(data);
+        }
         cloud.closeConnection();
         System.exit(0);
     }

@@ -240,8 +240,8 @@ public class MainController implements Initializable, ConnectionListener {
 
     private BooleanProperty _isConnected = new SimpleBooleanProperty(false);
 
-    private StringProperty _userNameProperty = new SimpleStringProperty("hubert@robospace.co.nz");
-    private StringProperty _networkPasswordProperty = new SimpleStringProperty("hrj123");
+    private StringProperty _userNameProperty = new SimpleStringProperty("your_email@address.com");
+    private StringProperty _networkPasswordProperty = new SimpleStringProperty("your_network_password");
     private StringProperty _networkNamesProperty = new SimpleStringProperty("network 1");
     private StringProperty _sessionIdProperty = new SimpleStringProperty("-1");
     private IntegerProperty _requestCountProperty = new SimpleIntegerProperty(0);
