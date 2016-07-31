@@ -180,7 +180,7 @@ public class MainController implements Initializable, ConnectionListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                if (_discoverableProperty.getValue() && (event.dataType.equals("Discovery Response")))
+                if (_discoverableProperty.getValue() && (event.dataType != null) && (event.dataType.equals("Discovery Response")))
                 {
                     String discoveredName = new String(event.data, StandardCharsets.UTF_8);
                     String discoveredSessionID = Integer.toString(event.fromSessionID);
